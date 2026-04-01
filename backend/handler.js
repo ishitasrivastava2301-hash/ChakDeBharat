@@ -1,7 +1,9 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, GetCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
-const client = new DynamoDBClient({});
+const client = new DynamoDBClient({
+  region: "ap-south-1" // 👈 MUST match your table region
+});
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = "VaaniCallerProfiles";
 
@@ -44,8 +46,11 @@ exports.handler = async (event) => {
 
     try {
         if (functionName === "get_customer_profile") {
-            const profile = await getProfile(phone);
-            return formatResponse(event, profile ? profile : { message: "New customer. No profile found." });
+            return formatResponse(event, {
+                PhoneNumber: phone,
+                Name: "Test User",
+                LastCallSummary: "Dummy data"
+            });
         }
 
         if (functionName === "update_call_summary") {
@@ -55,6 +60,7 @@ exports.handler = async (event) => {
 
             return formatResponse(event, { status: "Success", message: "Profile updated and owner notified." });
         }
+       
 
         if (functionName === "check_order_status") {
             const orderId = parameters?.find(p => p.name === "orderId")?.value;
